@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Начислить стаж за год{% endblock %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Сервис</p><h1>Начисление стажа</h1></div></div>
+<form class="card form narrow" method="post" novalidate data-validate data-confirm="Увеличить стаж всем сотрудникам? Действие нельзя отменить автоматически." data-confirm-ok="Начислить">
+  <p>Операция увеличивает <b>общий стаж</b> всех сотрудников на указанное количество лет, а преподавателям — также <b>стаж научно-педагогической работы</b>. Выполняется хранимой процедурой <code>sp_начислить_стаж</code>.</p>
+  <div class="field {% if error %}has-error{% endif %}">
+    <label for="years">Количество лет <span class="req" title="Обязательное поле">*</span></label>
+    <input id="years" type="number" name="years" value="{{ years }}" min="1" max="5" step="1" required title="Целое число от 1 до 5" data-label="Количество лет" style="width:8rem">
+    {% if error %}<div class="field-error" role="alert">{{ error }}</div>{% endif %}
+  </div>
+  <div class="form-actions">
+    <button class="btn primary" type="submit" title="Выполнить начисление стажа">Начислить</button>
+    <a class="btn ghost" href="/" title="Вернуться на главную без изменений">Отмена</a>
+  </div>
+</form>
+{% endblock %}

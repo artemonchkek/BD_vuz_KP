@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">{{ UNIVERSITY }}</p>
+    <h1>Кадровый учёт сотрудников вуза</h1>
+    <p class="lead">Личные карточки сотрудников, структура подразделений и выходные документы: телефонный справочник, списки по стажу, сведения о преподавателях с учёными степенями и званиями.</p>
+    <div class="actions">
+      <a class="btn primary" href="/employees/new" title="Заполнить личную карточку нового сотрудника">{{ m.icon('plus') }} Принять сотрудника</a>
+      <a class="btn" href="/employees" title="Открыть список сотрудников">{{ m.icon('search') }} Найти сотрудника</a>
+    </div>
+  </div>
+  <dl class="stats">
+    {% for s in stats %}<div class="stat"><dt>{{ s.показатель }}</dt><dd>{{ s.значение }}</dd></div>{% endfor %}
+  </dl>
+</section>
+
+<section class="tiles">
+  <a class="tile" href="/structure" title="Иерархия подразделений вуза">
+    <span class="tile-k">Структура</span><b>Схема подразделений</b>
+    <span>Отделы → факультеты → кафедры → лаборатории и численность сотрудников в каждом.</span></a>
+  <a class="tile" href="/reports/phones" title="Сформировать телефонный справочник">
+    <span class="tile-k">Отчёт 1</span><b>Телефонный справочник</b>
+    <span>Подразделения, работающие в них сотрудники и все их телефоны.</span></a>
+  <a class="tile" href="/reports/experience" title="Сформировать список сотрудников по стажу">
+    <span class="tile-k">Отчёт 2</span><b>Сотрудники по стажу</b>
+    <span>Сотрудники, стаж которых не превышает заданного, упорядоченные по отделам.</span></a>
+  <a class="tile" href="/reports/degrees" title="Сформировать сведения о преподавательском составе">
+    <span class="tile-k">Отчёт 3</span><b>Сведения о лицах с учёными степенями</b>
+    <span>Форма об обеспеченности преподавательским составом с итогами.</span></a>
+</section>
+{% endblock %}

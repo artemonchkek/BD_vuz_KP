@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Схема подразделений{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Структура вуза</p><h1>Схема подразделений</h1></div>
+  <a class="btn primary" href="/ref/otdel/new" title="Добавить отдел верхнего уровня">{{ m.icon('plus') }} Добавить отдел</a>
+</div>
+<p class="muted">Иерархия: отдел → факультет → кафедра → лаборатория. Нажмите на название, чтобы открыть подразделение и его сотрудников.</p>
+<div class="table-wrap">
+<table class="grid tree">
+  <thead><tr><th>Подразделение</th><th>Тип</th><th class="num" title="Сотрудники, закреплённые непосредственно за подразделением">Своих сотрудников</th><th class="num" title="С учётом всех подчинённых подразделений">Всего сотрудников</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr class="lvl-{{ r.уровень }}">
+      <td style="padding-left: {{ 0.75 + (r.уровень - 1) * 1.6 }}rem">
+        {% if r.уровень > 1 %}<span class="branch">└</span>{% endif %}
+        <a href="/unit/{{ unit_slug(r.тип) }}/{{ r.ид }}" title="Открыть подразделение">{{ r.название }}</a></td>
+      <td><span class="tag t-{{ r.уровень }}">{{ UNIT_TITLES[r.тип] }}</span></td>
+      <td class="num">{{ r.своих }}</td>
+      <td class="num"><b>{{ r.всего }}</b></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="empty">Подразделения не заведены. Начните с добавления отдела.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

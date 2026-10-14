@@ -1,0 +1,49 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Сотрудники по стажу работы{% endblock %}
+{% block content %}
+<div class="page-head no-print">
+  <div><p class="eyebrow">Отчёт 2</p><h1>Список сотрудников по стажу работы</h1></div>
+  {% if searched %}<button class="btn primary" type="button" onclick="window.print()" title="Напечатать список">{{ m.icon('print') }} Печать</button>{% endif %}
+</div>
+<form class="toolbar no-print" method="get" novalidate data-validate>
+  <div class="field inline-field {% if error %}has-error{% endif %}">
+    <label for="max">Стаж не более, лет <span class="req" title="Обязательное поле">*</span></label>
+    <input id="max" type="number" name="max" value="{{ max }}" min="0" max="70" step="1" required
+           title="Предельный общий стаж работы, целое число от 0 до 70" data-label="Стаж не более" style="width:7rem">
+  </div>
+  <select name="unit" title="Ограничить список подразделением (включая подчинённые)">{{ m.unit_options(units, unit, 'Весь вуз') }}</select>
+  <button class="btn" type="submit" title="Сформировать список">Сформировать</button>
+</form>
+{% if error %}<div class="flash err" role="alert">{{ error }}</div>{% endif %}
+
+{% if searched %}
+<article class="doc">
+  <header class="doc-head">
+    <p>{{ UNIVERSITY }}</p>
+    <h2>Список сотрудников, стаж работы которых не превышает {{ limit }} {{ 'года' if limit % 10 in (1,) and limit % 100 != 11 else 'лет' }}</h2>
+    <p class="muted">упорядочен по отделам · по состоянию на {{ today().strftime('%d.%m.%Y') }}</p>
+  </header>
+  {% if groups %}
+  <table class="grid">
+    <thead><tr><th class="num">№</th><th>ФИО</th><th>Должность</th><th>Подразделение</th><th class="num">Год рожд.</th><th class="num">Стаж, лет</th></tr></thead>
+    <tbody>
+    {% set ns = namespace(n=0) %}
+    {% for g in groups %}
+      <tr class="group-row"><td colspan="6">{{ g.отдел }} <span class="muted">— {{ g.сотрудники|length }} чел.</span></td></tr>
+      {% for e in g.сотрудники %}{% set ns.n = ns.n + 1 %}
+      <tr><td class="num">{{ ns.n }}</td><td>{{ e.фио }}</td><td>{{ e.должность }}</td>
+          <td class="small">{{ e.подразделение.split(' / ')[1:]|join(' / ') or '—' }}</td>
+          <td class="num">{{ e.год_рождения }}</td><td class="num">{{ e.общий_стаж }}</td></tr>
+      {% endfor %}
+    {% endfor %}
+    </tbody>
+    <tfoot><tr><td colspan="5">Итого сотрудников</td><td class="num">{{ total }}</td></tr></tfoot>
+  </table>
+  {% else %}
+  <p class="empty">Сотрудников со стажем не более {{ limit }} лет не найдено.</p>
+  {% endif %}
+</article>
+{% elif not error %}
+<p class="muted">Введите предельный стаж и нажмите «Сформировать».</p>
+{% endif %}
+{% endblock %}

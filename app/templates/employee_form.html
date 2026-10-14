@@ -1,0 +1,97 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}{{ 'Изменить личную карточку' if item_id else 'Приём сотрудника' }}{% endblock %}
+{% macro inp(name, type='text', maxlen=None, required=True, extra='', ph='') -%}
+<div class="field {% if errors.get(name) %}has-error{% endif %}">
+  <label for="e-{{ name }}">{{ labels[name] }}{% if required %} <span class="req" title="Обязательное поле">*</span>{% endif %}</label>
+  <input id="e-{{ name }}" type="{{ type }}" name="{{ name }}" value="{{ values.get(name) if values.get(name) is not none else '' }}"
+    {% if maxlen %}maxlength="{{ maxlen }}"{% endif %} {% if required %}required{% endif %} {{ extra|safe }}
+    placeholder="{{ ph }}" title="{{ labels[name] }}" data-label="{{ labels[name] }}">
+  {{ m.field_error(errors, name) }}
+</div>
+{%- endmacro %}
+{% macro sel(name, items, required=True, empty='— не указано —') -%}
+<div class="field {% if errors.get(name) %}has-error{% endif %}">
+  <label for="e-{{ name }}">{{ labels[name] }}{% if required %} <span class="req" title="Обязательное поле">*</span>{% endif %}</label>
+  <select id="e-{{ name }}" name="{{ name }}" {% if required %}required{% endif %} title="Выберите значение из справочника" data-label="{{ labels[name] }}">
+    <option value="">{{ '— выберите —' if required else empty }}</option>
+    {% for o in items %}<option value="{{ o.id }}" {% if values.get(name)|string == o.id|string %}selected{% endif %}>{{ o.title }}</option>{% endfor %}
+  </select>
+  {{ m.field_error(errors, name) }}
+</div>
+{%- endmacro %}
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow"><a href="/employees" title="Вернуться к списку сотрудников">Сотрудники</a></p>
+  <h1>{% if item_id %}Личная карточка: изменение <span class="muted">таб. № {{ item_id }}</span>{% else %}Приём на работу: личная карточка{% endif %}</h1></div>
+</div>
+<form class="form" method="post" action="/employees/save" novalidate data-validate>
+  {% if item_id %}<input type="hidden" name="item_id" value="{{ item_id }}">{% endif %}
+  {% if errors %}<div class="flash err" role="alert">{{ errors.get('_form') or 'Карточка не сохранена: исправьте отмеченные поля.' }}</div>{% endif %}
+
+  <fieldset class="card">
+    <legend>Сотрудник</legend>
+    <div class="grid3">
+      {{ inp('фамилия', maxlen=50, ph='Иванов') }}
+      {{ inp('имя', maxlen=50, ph='Иван') }}
+      {{ inp('отчество', maxlen=50, required=False, ph='Иванович') }}
+    </div>
+    <div class="grid3">
+      {{ inp('год_рождения', type='number', extra='min="' ~ min_year ~ '" max="' ~ max_year ~ '" step="1"', ph=min_year ~ '–' ~ max_year) }}
+      {{ sel('код_должности', refs.posts) }}
+      <div class="field {% if errors.get('подразделение') %}has-error{% endif %}">
+        <label for="e-подразделение">{{ labels['подразделение'] }} <span class="req" title="Обязательное поле">*</span></label>
+        <select id="e-подразделение" name="подразделение" required title="Подразделение, в котором работает сотрудник" data-label="{{ labels['подразделение'] }}">
+          {{ m.unit_options(refs.units, values.get('подразделение'), '— выберите —') }}
+        </select>
+        {{ m.field_error(errors, 'подразделение') }}
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="card">
+    <legend>Образование (по диплому)</legend>
+    <div class="grid3">
+      {{ inp('специальность_по_диплому', maxlen=150, ph='Информационные системы и технологии') }}
+      {{ inp('квалификация_по_диплому', maxlen=100, ph='Инженер, бакалавр, магистр…') }}
+      {{ inp('вуз_по_диплому', maxlen=200, required=False, ph='Наименование вуза') }}
+    </div>
+  </fieldset>
+
+  <fieldset class="card">
+    <legend>Стаж, учёная степень и звание</legend>
+    <div class="grid3">
+      {{ inp('общий_стаж', type='number', extra='min="0" max="70" step="1"', ph='лет') }}
+      {{ inp('стаж_нпр', type='number', extra='min="0" max="70" step="1"', ph='лет') }}
+      {{ inp('основное_место_работы', maxlen=200, ph='ИРНИТУ') }}
+    </div>
+    <div class="grid3">
+      {{ sel('код_степени', refs.degrees, required=False, empty='— нет степени —') }}
+      {{ sel('код_звания', refs.titles, required=False, empty='— нет звания —') }}
+    </div>
+  </fieldset>
+
+  <fieldset class="card {% if errors.get('телефон') %}has-error{% endif %}">
+    <legend>Телефоны</legend>
+    <div id="phones">
+      {% for p in phones %}
+      <div class="phone-row">
+        <select name="phone_type" title="Тип телефона" aria-label="Тип телефона">
+          {% for t in refs.phone_types %}<option value="{{ t.id }}" {% if p.код_типа|string == t.id|string %}selected{% endif %}>{{ t.title }}</option>{% endfor %}
+        </select>
+        <input type="tel" name="phone_number" value="{{ p.номер }}" maxlength="20" placeholder="+7 (3952) 40-50-60"
+               title="Номер телефона: цифры, пробел, дефис, скобки, «+» в начале" aria-label="Номер телефона">
+        <button type="button" class="btn-icon danger" data-remove-phone title="Удалить этот телефон" aria-label="Удалить телефон">{{ m.icon('x') }}</button>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="button" class="btn small" id="add-phone" title="Добавить ещё один номер телефона">{{ m.icon('plus') }} Добавить телефон</button>
+    {{ m.field_error(errors, 'телефон') }}
+  </fieldset>
+
+  <div class="form-actions">
+    <button class="btn primary" type="submit" title="Сохранить личную карточку">{{ m.icon('save') }} Сохранить</button>
+    <a class="btn ghost" href="{{ '/employees/' ~ item_id if item_id else '/employees' }}" title="Выйти без сохранения">Отмена</a>
+    <span class="muted"><span class="req">*</span> — обязательные поля</span>
+  </div>
+</form>
+{% endblock %}

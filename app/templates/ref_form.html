@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}{{ 'Изменить' if item_id else 'Добавить' }} {{ ent.one }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow"><a href="/ref/{{ ent.slug }}" title="Вернуться к списку">{{ ent.title }}</a></p>
+    <h1>{{ 'Изменить' if item_id else 'Добавить' }} {{ ent.one }}{% if item_id %} <span class="muted">№ {{ item_id }}</span>{% endif %}</h1>
+  </div>
+</div>
+<form class="card form narrow" method="post" action="/ref/{{ ent.slug }}/save" novalidate data-validate>
+  {% if item_id %}<input type="hidden" name="item_id" value="{{ item_id }}">{% endif %}
+  {% if errors.get('_form') %}<div class="flash err" role="alert">{{ errors['_form'] }}</div>{% endif %}
+  {% for f in ent.fields %}
+    {% if f.kind == 'checkbox' %}
+      <label class="check"><input type="checkbox" name="{{ f.name }}" {% if values.get(f.name) %}checked{% endif %}
+             title="{{ f.hint or f.label }}"> {{ f.label }}</label>
+      {% if f.hint %}<p class="hint">{{ f.hint }}</p>{% endif %}
+    {% else %}
+    <div class="field {% if errors.get(f.name) %}has-error{% endif %}">
+      <label for="f-{{ loop.index }}">{{ f.label }}{% if f.required %} <span class="req" title="Обязательное поле">*</span>{% endif %}</label>
+      {% if f.kind == 'select' %}
+        <select id="f-{{ loop.index }}" name="{{ f.name }}" {% if f.required %}required{% endif %} title="Выберите значение из списка" data-label="{{ f.label }}">
+          <option value="">— выберите —</option>
+          {% for o in options[f.name] %}<option value="{{ o.id }}" {% if values.get(f.name)|string == o.id|string %}selected{% endif %}>{{ o.title }}</option>{% endfor %}
+        </select>
+      {% else %}
+        <input id="f-{{ loop.index }}" type="text" name="{{ f.name }}" value="{{ values.get(f.name) or '' }}" maxlength="{{ f.maxlen }}" minlength="2"
+               {% if f.required %}required{% endif %} title="{{ f.hint or f.label }}" data-label="{{ f.label }}" autofocus>
+      {% endif %}
+      {% if f.hint %}<p class="hint">{{ f.hint }}</p>{% endif %}
+      {{ m.field_error(errors, f.name) }}
+    </div>
+    {% endif %}
+  {% endfor %}
+  <div class="form-actions">
+    <button class="btn primary" type="submit" title="Сохранить запись">{{ m.icon('save') }} Сохранить</button>
+    <a class="btn ghost" href="/ref/{{ ent.slug }}" title="Вернуться к списку без сохранения">Отмена</a>
+  </div>
+</form>
+{% endblock %}

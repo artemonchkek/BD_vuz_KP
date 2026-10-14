@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Ошибка{% endblock %}
+{% block content %}
+<div class="card error-card">
+  <h1>Операция не выполнена</h1>
+  <p>{{ message }}</p>
+  <p><a class="btn" href="/" title="Вернуться на главную страницу">{{ m.icon('back') }} На главную</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Телефонный справочник{% endblock %}
+{% block content %}
+<div class="page-head no-print">
+  <div><p class="eyebrow">Отчёт 1</p><h1>Телефонный справочник</h1></div>
+  <button class="btn primary" type="button" onclick="window.print()" title="Напечатать телефонный справочник">{{ m.icon('print') }} Печать</button>
+</div>
+<form class="toolbar no-print" method="get">
+  <select name="unit" title="Сформировать справочник по подразделению (включая подчинённые)">{{ m.unit_options(units, unit, 'Весь вуз') }}</select>
+  <label class="check"><input type="checkbox" name="hide_empty" value="1" {% if hide_empty %}checked{% endif %} title="Не выводить подразделения, в которых нет сотрудников"> скрыть подразделения без сотрудников</label>
+  <button class="btn" type="submit" title="Сформировать справочник">Сформировать</button>
+</form>
+
+<article class="doc">
+  <header class="doc-head">
+    <p>{{ UNIVERSITY }}</p>
+    <h2>Телефонный справочник</h2>
+    <p class="muted">по состоянию на {{ today().strftime('%d.%m.%Y') }} · сотрудников: {{ total }}</p>
+  </header>
+  {% for g in groups %}
+  <section class="dir-group lvl-{{ g.уровень }}">
+    <h3><span class="tag t-{{ g.уровень }}">{{ UNIT_TITLES[g.тип] }}</span> {{ g.название }}</h3>
+    {% if g.уровень > 1 %}<p class="muted small path">{{ g.путь.rsplit(' / ', 1)[0] }}</p>{% endif %}
+    {% if g.сотрудники %}
+    <table class="grid compact">
+      <thead><tr><th style="width:35%">Сотрудник</th><th style="width:28%">Должность</th><th>Телефоны</th></tr></thead>
+      <tbody>
+      {% for e in g.сотрудники %}
+        <tr><td>{{ e.фио }}</td><td>{{ e.должность }}</td>
+            <td class="phones">{% for p in e.телефоны_список %}<div>{{ p }}</div>{% else %}<span class="muted">не указаны</span>{% endfor %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted small">Сотрудники непосредственно за подразделением не закреплены.</p>{% endif %}
+  </section>
+  {% else %}
+  <p class="empty">Нет данных для выбранного подразделения.</p>
+  {% endfor %}
+</article>
+{% endblock %}

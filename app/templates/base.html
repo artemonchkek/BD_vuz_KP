@@ -1,0 +1,87 @@
+{% import "_macros.html" as m with context %}<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ APP_TITLE }}{% endblock %} — {{ APP_TITLE }}</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231d3557'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EСВ%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<header class="topbar no-print">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="/" title="На главную страницу">
+      <span class="brand-mark">СВ</span>
+      <span class="brand-text"><b>Сотрудники вуза</b><small>ИРНИТУ · кадровый учёт</small></span>
+    </a>
+    <button class="menu-toggle" type="button" title="Показать или скрыть меню" aria-label="Меню" aria-expanded="false">☰</button>
+    <nav class="menu" aria-label="Главное меню">
+      <a href="/employees" class="menu-link" title="Личные карточки сотрудников: поиск, приём на работу, изменение">Сотрудники</a>
+      <div class="dropdown">
+        <button type="button" class="menu-link" title="Отделы, факультеты, кафедры и лаборатории">Структура вуза ▾</button>
+        <div class="dropdown-menu">
+          <a href="/structure" title="Иерархия подразделений с численностью сотрудников">Схема подразделений</a>
+          <hr>
+          <a href="/ref/otdel" title="Список отделов (институтов)">Отделы</a>
+          <a href="/ref/fakultet" title="Список факультетов">Факультеты</a>
+          <a href="/ref/kafedra" title="Список кафедр">Кафедры</a>
+          <a href="/ref/laboratoriya" title="Список лабораторий">Лаборатории</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button type="button" class="menu-link" title="Справочники, используемые в личной карточке">Справочники ▾</button>
+        <div class="dropdown-menu">
+          <a href="/ref/dolzhnost" title="Справочник должностей">Должности</a>
+          <a href="/ref/stepen" title="Справочник учёных степеней">Учёные степени</a>
+          <a href="/ref/zvanie" title="Справочник учёных званий">Учёные звания</a>
+          <a href="/ref/tip-telefona" title="Справочник типов телефонов">Типы телефонов</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button type="button" class="menu-link" title="Выходные документы">Отчёты ▾</button>
+        <div class="dropdown-menu">
+          <a href="/reports/phones" title="Подразделения, их сотрудники и телефоны">Телефонный справочник</a>
+          <a href="/reports/experience" title="Сотрудники со стажем не выше заданного, по отделам">Сотрудники по стажу работы</a>
+          <a href="/reports/degrees" title="Форма сведений о преподавательском составе">Сведения о лицах с учёными степенями и званиями</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button type="button" class="menu-link" title="Служебные операции">Сервис ▾</button>
+        <div class="dropdown-menu right">
+          <a href="/service/experience" title="Ежегодное увеличение стажа всех сотрудников">Начислить стаж за год</a>
+          <a href="/about" title="Сведения о программе и разработчике">О программе</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap page">
+  {% if request.query_params.get('ok') %}
+  <div class="flash ok no-print" role="status"><span>{{ request.query_params.get('ok') }}</span>
+    <button type="button" class="flash-close" title="Закрыть сообщение" aria-label="Закрыть">{{ m.icon('x') }}</button></div>
+  {% endif %}
+  {% if request.query_params.get('err') %}
+  <div class="flash err no-print" role="alert"><span>{{ request.query_params.get('err') }}</span>
+    <button type="button" class="flash-close" title="Закрыть сообщение" aria-label="Закрыть">{{ m.icon('x') }}</button></div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer no-print">
+  <div class="wrap">БД «Сотрудники высшего учебного заведения» · курсовой проект по дисциплине «Базы данных» · ИРНИТУ, {{ today().year }}</div>
+</footer>
+
+<div class="modal-backdrop" id="confirm-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-text">
+    <h3>Подтверждение</h3>
+    <p id="confirm-text"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="confirm-cancel" title="Отменить удаление">Отмена</button>
+      <button type="button" class="btn danger" id="confirm-ok" title="Подтвердить удаление">Удалить</button>
+    </div>
+  </div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

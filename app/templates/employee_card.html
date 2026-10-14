@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}{{ e.фио }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow no-print"><a href="/employees" title="Вернуться к списку сотрудников">Сотрудники</a></p>
+  <h1>{{ e.фио }}</h1><p class="muted">Табельный № {{ e.табельный_номер }} · {{ e.должность }}</p></div>
+  <div class="actions no-print">
+    <button class="btn" type="button" onclick="window.print()" title="Напечатать личную карточку">{{ m.icon('print') }} Печать</button>
+    <a class="btn primary" href="/employees/{{ e.табельный_номер }}/edit" title="Изменить личную карточку">{{ m.icon('edit') }} Изменить</a>
+    <form method="post" action="/employees/{{ e.табельный_номер }}/delete" class="inline" data-confirm="Удалить сотрудника «{{ e.фио }}»? Карточка и телефоны будут удалены.">
+      <button class="btn danger-outline" type="submit" title="Удалить сотрудника (увольнение)">{{ m.icon('trash') }} Удалить</button>
+    </form>
+  </div>
+</div>
+
+<div class="card-grid">
+<section class="card">
+  <h2>Личная карточка</h2>
+  <table class="kv">
+    <tr><th>Фамилия, имя, отчество</th><td>{{ e.фио }}</td></tr>
+    <tr><th>Год рождения</th><td>{{ e.год_рождения }} <span class="muted">({{ e.возраст|years }})</span></td></tr>
+    <tr><th>Должность</th><td>{{ e.должность }}{% if e.преподавательская %} <span class="tag t-3" title="Должность профессорско-преподавательского состава">ППС</span>{% endif %}</td></tr>
+    <tr><th>Подразделение</th><td><a href="/unit/{{ unit_slug(e.тип_подразделения) }}/{{ e.ключ_подразделения.split(':')[1] }}" title="Открыть подразделение">{{ e.подразделение }}</a><div class="muted small">{{ e.путь_подразделения }}</div></td></tr>
+    <tr><th>Специальность по диплому</th><td>{{ e.специальность_по_диплому }}</td></tr>
+    <tr><th>Квалификация по диплому</th><td>{{ e.квалификация_по_диплому }}</td></tr>
+    <tr><th>Вуз (по диплому)</th><td>{{ e.вуз_по_диплому or '—' }}</td></tr>
+    <tr><th>Общий стаж работы</th><td>{{ e.общий_стаж|years }}</td></tr>
+    <tr><th>Стаж научно-педагогической работы</th><td>{{ e.стаж_нпр|years }}</td></tr>
+    <tr><th>Учёная степень</th><td>{{ e.ученая_степень or '—' }}</td></tr>
+    <tr><th>Учёное звание</th><td>{{ e.ученое_звание or '—' }}</td></tr>
+    <tr><th>Основное место работы</th><td>{{ e.основное_место_работы }}</td></tr>
+  </table>
+</section>
+<div>
+<section class="card">
+  <h2>Телефоны</h2>
+  {% if phones %}
+  <ul class="phone-list">{% for p in phones %}<li>{{ m.icon('phone') }} <span class="muted">{{ p.тип }}:</span> <b>{{ p.номер }}</b></li>{% endfor %}</ul>
+  {% else %}<p class="muted">Телефоны не указаны.</p>{% endif %}
+</section>
+<section class="card no-print">
+  <h2>Перевод в другое подразделение</h2>
+  <form method="post" action="/employees/{{ e.табельный_номер }}/move" class="stack">
+    <select name="unit" required title="Выберите подразделение, в которое переводится сотрудник">{{ m.unit_options(all_units(), e.ключ_подразделения) }}</select>
+    <button class="btn" type="submit" title="Перевести сотрудника в выбранное подразделение">{{ m.icon('move') }} Перевести</button>
+  </form>
+</section>
+</div>
+</div>
+{% endblock %}

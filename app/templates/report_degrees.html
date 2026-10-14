@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Сведения о лицах с учёными степенями и званиями{% endblock %}
+{% block content %}
+<div class="page-head no-print">
+  <div><p class="eyebrow">Отчёт 3</p><h1>Сведения о лицах с учёными степенями и учёными званиями</h1></div>
+  <button class="btn primary" type="button" onclick="window.print()" title="Напечатать форму">{{ m.icon('print') }} Печать</button>
+</div>
+<form class="toolbar wrap-fields no-print" method="get">
+  <div class="field inline-field"><label>Подразделение</label>
+    <select name="unit" title="Преподаватели выбранного подразделения (включая подчинённые)">{{ m.unit_options(units, unit, 'Весь вуз') }}</select></div>
+  <div class="field inline-field"><label>Код и название профиля</label>
+    <input type="text" name="profile" value="{{ profile }}" maxlength="200" placeholder="09.03.01 – Информатика и вычислительная техника" title="Выводится в шапке формы" style="width:22rem"></div>
+  <div class="field inline-field"><label>ФИО проректора</label>
+    <input type="text" name="prorector" value="{{ prorector }}" maxlength="60" title="Подпись проректора по учебной работе" style="width:11rem"></div>
+  <label class="check"><input type="checkbox" name="only" value="1" {% if only %}checked{% endif %} title="Выводить только преподавателей с учёной степенью или званием"> только со степенью / званием</label>
+  <button class="btn" type="submit" title="Сформировать форму">Сформировать</button>
+</form>
+
+<article class="doc form-doc">
+  <h2 class="center">Сведения о лицах с учеными степенями и учеными званиями</h2>
+  <div class="uline">{{ UNIVERSITY }}</div>
+  <div class="ucap">(наименование вуза)</div>
+  <div class="uline">{{ profile or (unit_name if unit_name else '&nbsp;'|safe) }}</div>
+  <div class="ucap">Код профиля – Название профиля</div>
+  <div class="ucap small">(наименование гуманитарных, социально-экономических, общих математических и естественных дисциплин в целом по вузу или код, наименование образовательной программы, общепрофессиональные и специальные дисциплины)</div>
+
+  <table class="grid form-table">
+    <thead>
+      <tr><th rowspan="2" class="num">№ п/п</th><th colspan="5">Обеспеченность преподавательским составом</th></tr>
+      <tr><th>Ведущие преподаватели по дисциплинам (ФИО)</th><th>ВУЗ, специальность по диплому</th><th>Ученая степень и ученое звание</th><th>Стаж научно-педагогической работы по специальности</th><th>Основное место работы, должность</th></tr>
+      <tr class="colnums"><th></th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
+    </thead>
+    <tbody>
+    {% for r in rows %}
+      <tr><td class="num">{{ loop.index }}</td><td>{{ r.фио }}</td><td>{{ r.вуз_специальность }}</td><td>{{ r.степень_звание }}</td><td class="num">{{ r.стаж_нпр }}</td><td>{{ r.место_должность }}</td></tr>
+    {% else %}
+      <tr><td colspan="6" class="empty">Преподаватели в выбранном подразделении не найдены.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <p>Всего:</p>
+    <p>общая численность преподавателей, привлекаемых к реализации соответствующих циклов дисциплин <b class="u">{{ teachers_total }}</b> чел.</p>
+    <p>Лиц с учеными степенями и учеными званиями <b class="u">{{ with_degree }}</b> чел.</p>
+    <p>Наличие документов об участии в учебном процессе в вузе всех лиц, поименованных в списке, имеется.</p>
+    <p>Поименованные лица не имеют запрета на педагогическую деятельность приговором суда или по медицинским показаниям.</p>
+  </div>
+  <div class="sign"><span>Проректор по учебной работе</span><span>________________ /{{ prorector or 'ФИО проректора' }}/</span></div>
+</article>
+{% endblock %}

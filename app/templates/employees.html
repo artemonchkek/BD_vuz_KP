@@ -1,0 +1,64 @@
+{% extends "base.html" %}{% import "_macros.html" as m with context %}
+{% block title %}Сотрудники{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Личные карточки</p><h1>Сотрудники</h1></div>
+  <a class="btn primary" href="/employees/new" title="Заполнить личную карточку нового сотрудника">{{ m.icon('plus') }} Принять сотрудника</a>
+</div>
+
+<form class="toolbar filters no-print" method="get">
+  <label class="search">{{ m.icon('search') }}
+    <input type="search" name="q" value="{{ f.q }}" placeholder="ФИО или телефон…" title="Поиск по части фамилии, имени, отчества или номера телефона"></label>
+  <select name="unit" title="Показать сотрудников подразделения (включая подчинённые)">{{ m.unit_options(units, f.unit, 'Все подразделения') }}</select>
+  <select name="post" title="Отбор по должности">
+    <option value="">Все должности</option>
+    {% for p in posts %}<option value="{{ p.id }}" {% if f.post == p.id|string %}selected{% endif %}>{{ p.title }}</option>{% endfor %}
+  </select>
+  <select name="degree" title="Отбор по наличию учёной степени или звания">
+    <option value="">Степень/звание: все</option>
+    <option value="yes" {% if f.degree == 'yes' %}selected{% endif %}>Есть степень или звание</option>
+    <option value="no" {% if f.degree == 'no' %}selected{% endif %}>Без степени и звания</option>
+  </select>
+  <input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ dir }}">
+  <button class="btn" type="submit" title="Применить условия отбора">Найти</button>
+  {% if f.q or f.unit or f.post or f.degree %}<a class="btn ghost" href="/employees" title="Сбросить все условия отбора">{{ m.icon('reset') }} Сбросить</a>{% endif %}
+</form>
+<p class="muted">Найдено сотрудников: <b>{{ rows|length }}</b></p>
+
+<div class="table-wrap">
+<table class="grid">
+  <thead><tr>
+    {{ m.sort_th('Таб. №', 'номер', sort, dir, 'num') }}
+    {{ m.sort_th('ФИО', 'фио', sort, dir) }}
+    {{ m.sort_th('Должность', 'должность', sort, dir) }}
+    {{ m.sort_th('Подразделение', 'подразделение', sort, dir) }}
+    {{ m.sort_th('Год рожд.', 'год', sort, dir, 'num') }}
+    {{ m.sort_th('Стаж', 'стаж', sort, dir, 'num') }}
+    <th>Учёная степень, звание</th>
+    <th>Телефоны</th>
+    <th class="actions-col no-print">Действия</th>
+  </tr></thead>
+  <tbody>
+  {% for e in rows %}
+    <tr>
+      <td class="num">{{ e.табельный_номер }}</td>
+      <td><a href="/employees/{{ e.табельный_номер }}" title="Открыть личную карточку">{{ e.фио }}</a></td>
+      <td>{{ e.должность }}</td>
+      <td><a class="sub" href="/unit/{{ unit_slug(e.тип_подразделения) }}/{{ e.ключ_подразделения.split(':')[1] }}" title="{{ e.путь_подразделения }}">{{ e.подразделение }}</a></td>
+      <td class="num">{{ e.год_рождения }}</td>
+      <td class="num">{{ e.общий_стаж }}</td>
+      <td>{{ [e.ученая_степень, e.ученое_звание]|select|join(', ') or '—' }}</td>
+      <td class="phones">{% for p in (e.телефоны or '').split('; ') if p %}<div>{{ p }}</div>{% else %}—{% endfor %}</td>
+      <td class="actions-col no-print">
+        <a class="btn-icon" href="/employees/{{ e.табельный_номер }}" title="Открыть личную карточку" aria-label="Открыть">{{ m.icon('eye') }}</a>
+        <a class="btn-icon" href="/employees/{{ e.табельный_номер }}/edit" title="Изменить личную карточку" aria-label="Изменить">{{ m.icon('edit') }}</a>
+        {{ m.delete_button('/employees/' ~ e.табельный_номер ~ '/delete', 'Удалить сотрудника (увольнение)', 'сотрудника «' ~ e.фио ~ '»') }}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="empty">Сотрудники не найдены. Измените условия отбора.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
